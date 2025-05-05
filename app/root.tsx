@@ -18,6 +18,7 @@ import {
 
 import { themeSessionResolver } from './sessions.server';
 import { cn } from './lib/utils';
+import { Toaster } from './components/ui/toaster';
 
 // Return the theme from the session storage using the loader
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -63,10 +64,11 @@ export function App() {
         <Links />
       </head>
       <body>
+        <Toaster />
         <Outlet />
         <ScrollRestoration />
         <Scripts />
-        {/* <LiveReload />   */}
+        {/* <LiveReload /> */}
       </body>
     </html>
   );

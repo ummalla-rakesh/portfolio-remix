@@ -65,9 +65,11 @@ const NavLink = ({ to, active, children }: NavLinkProps) => {
   return (
     <Link
       to={to}
-      className={`text-sm font-medium tracking-wide transition-all duration-300 hover:opacity-100 ${
-        active ? 'opacity-100' : 'opacity-60'
-      } link-underline`}
+      className={cn(
+        'text-sm font-medium tracking-wide transition-all duration-300 hover:opacity-100',
+        active ? 'opacity-100' : 'opacity-60',
+        'hover:link-underline'
+      )}  
     >
       {children}
     </Link>

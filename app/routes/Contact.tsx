@@ -1,3 +1,4 @@
+'use client';
 import { json } from '@remix-run/node';
 import { useActionData, Form } from '@remix-run/react';
 import Navbar from '~/components/Navbar';
@@ -7,17 +8,45 @@ import AnimatedText from '~/components/common/AnimatedText';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { Textarea } from '~/components/ui/textarea';
-import { Mail, Send, Linkedin, Github } from 'lucide-react';
-import { useToast } from '~/hooks/use-toast';
+import { Mail, Send, Linkedin, Github, Loader } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Label } from '~/components/ui/label';
+import { useToast } from '~/components/ui/use-toast';
+import { ToastAction } from '~/components/ui/toast';
+import {
+  useField,
+  useIsSubmitting,
+  ValidatedForm,
+  validationError,
+} from 'remix-validated-form';
+import { withZod } from '@remix-validated-form/with-zod';
+import { z } from 'zod';
+export const validator = withZod(
+  z.object({
+    name: z
+      .string()
+      .nonempty('Name is required')
+      .min(3, 'Name must be at least 3 characters long'),
+    email: z
+      .string()
+      .nonempty('Email is required')
+      .email('Invalid emaill address'),
+    message: z
+      .string()
+      .nonempty('message is required')
+      .min(6, 'message must be at least 6 characters long'),
+  })
+);
 
 export const action = async ({ request }: { request: Request }) => {
-  const formData = await request.formData();
-  const name = formData.get('name');
-  const email = formData.get('email');
-  const message = formData.get('message');
+  console.log('Form submitted');
 
-  if (!name || !email || !message) {
-    return json({ error: 'All fields are required.' }, { status: 400 });
+  const result = await validator.validate(await request.formData());
+
+  if (result.error) {
+    return validationError(result.error, {
+      fieldErrors: result.error.fieldErrors,
+    });
   }
 
   // Simulate form submission (e.g., send email or save to database)
@@ -28,58 +57,71 @@ export const action = async ({ request }: { request: Request }) => {
 
 const ContactForm = () => {
   const { toast } = useToast();
-  const actionData = useActionData<typeof action>();
-  console.log('actionData', actionData);
+  const actionData = useActionData<{
+    success?: boolean;
+    error?: string;
+    fieldErrors?: Record<string, string>;
+  }>();
+  const isSubmitting = useIsSubmitting('contact-form');
 
-  if (actionData && 'error' in actionData && actionData.error) {
-    toast({
-      title: 'Error',
-      description: actionData.error,
-      variant: 'destructive',
-    });
-  }
-  if (actionData && 'success' in actionData && actionData.success) {
-    toast({
-      title: 'Success',
-      description: 'Your message has been sent successfully.',
-      variant: 'default',
-    });
-  }
+  useEffect(() => {
+    document.title = 'Portfolio | Contact';
+  }, []);
+
+  useEffect(() => {
+    if (actionData?.success) {
+      toast({
+        title: 'Success',
+        description: 'Your message has been sent successfully.',
+        variant: 'default',
+        // type: 'foreground',
+      });
+    }
+  }, [actionData, toast]);
 
   return (
-    <Form method="post" className="space-y-6">
-      <div>
-        <label htmlFor="name" className="text-sm opacity-80 mb-2 block">
-          Name
-        </label>
-        <Input id="name" name="name" required />
-      </div>
+    <>
+      <ValidatedForm
+        validator={validator}
+        method="post"
+        defaultValues={{}}
+        className="space-y-6"
+        id="contact-form"
+      >
+        {['name', 'email', 'message'].map((field) => {
+          const { error, getInputProps } = useField(field, {
+            formId: 'contact-form',
+          });
+          const isTextarea = field === 'message';
+          return (
+            <div key={field}>
+              <Label htmlFor={field} className="text-sm opacity-80 mb-2 block">
+                {field.charAt(0).toUpperCase() + field.slice(1)}
+              </Label>
+              {isTextarea ? (
+                <Textarea {...getInputProps()} id={field} rows={6} />
+              ) : (
+                <Input {...getInputProps()} id={field} />
+              )}
+              {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+            </div>
+          );
+        })}
 
-      <div>
-        <label htmlFor="email" className="text-sm opacity-80 mb-2 block">
-          Email
-        </label>
-        <Input id="email" name="email" type="email" required />
-      </div>
-
-      <div>
-        <label htmlFor="message" className="text-sm opacity-80 mb-2 block">
-          Message
-        </label>
-        <Textarea id="message" name="message" required rows={6} />
-      </div>
-
-      {actionData && 'error' in actionData && actionData.error && (
-        <p className="text-red-500 text-sm">{actionData.error}</p>
-      )}
-
-      <Button type="submit">
-        <span className="flex items-center">
-          <span className="mr-2">Send message</span>
-          <Send size={16} />
-        </span>
-      </Button>
-    </Form>
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          className="bg-white text-black hover:bg-white/90 w-full sm:w-auto px-8"
+        >
+          {isSubmitting ? (
+            <Loader className="animate-spin mr-2" size={16} />
+          ) : (
+            <Send className="mr-2" size={16} />
+          )}
+          {isSubmitting ? 'Submitting...' : 'Submit'}
+        </Button>
+      </ValidatedForm>
+    </>
   );
 };
 
