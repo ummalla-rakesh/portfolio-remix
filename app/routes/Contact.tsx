@@ -70,7 +70,7 @@ const Contact = () => {
   }, []);
 
   useEffect(() => {
-    if (actionData.success) {
+    if (actionData?.success) {
       showToast();
     }
     if (actionData?.errors) {

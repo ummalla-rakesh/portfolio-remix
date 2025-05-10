@@ -68,7 +68,7 @@ export function App() {
       <body>
         <Toaster />
         <Navbar />
-        <main className="container mx-auto px-6">
+        <main className="container mx-auto px-6 py-20 sm:py-28">
           <Outlet />
         </main>
         <ScrollRestoration />

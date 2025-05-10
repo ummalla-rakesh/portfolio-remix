@@ -31,7 +31,7 @@ const Index = () => {
       <div className="min-h-screen flex flex-col">
         <div className="flex-1">
           <div className="max-w-7xl">
-            <section className="py-20 sm:py-28">
+            <section className="">
               <div className="max-w-3xl">
                 <AnimatedText
                   text="Hi! i'm"
