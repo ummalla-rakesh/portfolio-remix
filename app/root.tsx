@@ -19,7 +19,8 @@ import {
 import { themeSessionResolver } from './sessions.server';
 import { cn } from './lib/utils';
 import { Toaster } from './components/ui/toaster';
-
+import Navbar from './components/Navbar';
+export { ErrorBoundary } from './routes/ErrorBoundary';
 // Return the theme from the session storage using the loader
 export async function loader({ request }: LoaderFunctionArgs) {
   const { getTheme } = await themeSessionResolver(request);
@@ -51,6 +52,7 @@ export const links: LinksFunction = () => [
     href: 'https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap',
   },
 ];
+
 export function App() {
   const data = useLoaderData<typeof loader>();
   const [theme] = useTheme();
@@ -65,10 +67,13 @@ export function App() {
       </head>
       <body>
         <Toaster />
-        <Outlet />
+        <Navbar />
+        <main className="container mx-auto px-6">
+          <Outlet />
+        </main>
         <ScrollRestoration />
         <Scripts />
-        {/* <LiveReload /> */}
+        <LiveReload />
       </body>
     </html>
   );

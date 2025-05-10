@@ -1,8 +1,6 @@
 import { MetaFunction } from '@remix-run/node';
 import { Link } from '@remix-run/react';
-import { ArrowRight } from 'lucide-react';
 import Navbar from '~/components/Navbar';
-import Footer from '~/components/Footer';
 import AnimatedText from '~/components/common/AnimatedText';
 import PageTransition from '~/components/common/PageTransition';
 
@@ -31,10 +29,8 @@ const Index = () => {
   return (
     <PageTransition>
       <div className="min-h-screen flex flex-col">
-        <Navbar />
-
-        <main className="flex-1 pt-32 pb-20">
-          <div className="container mx-auto px-6 max-w-7xl">
+        <div className="flex-1">
+          <div className="max-w-7xl">
             <section className="py-20 sm:py-28">
               <div className="max-w-3xl">
                 <AnimatedText
@@ -93,7 +89,7 @@ const Index = () => {
               </div>
             </section>
           </div>
-        </main>
+        </div>
 
         {/* <Footer /> */}
       </div>

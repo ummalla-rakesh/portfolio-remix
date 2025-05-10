@@ -28,11 +28,12 @@ const Navbar = () => {
     >
       <div className="container mx-auto px-6 max-w-7xl flex items-center justify-between">
         <Link to="/" className="group flex items-center">
-          <img
+          {/* <img
             alt="Logo"
             className="h-8 w-auto opacity-90 group-hover:opacity-100 transition-opacity duration-300"
-            src="https://cdn3d.iconscout.com/3d/premium/thumb/cube-6013626-4958573.png?f=webp"
-          />
+            src=""
+          /> */}
+          Rakesh
         </Link>
 
         <nav className="flex items-center space-x-8">
@@ -69,7 +70,7 @@ const NavLink = ({ to, active, children }: NavLinkProps) => {
         'text-sm font-medium tracking-wide transition-all duration-300 hover:opacity-100',
         active ? 'opacity-100' : 'opacity-60',
         'hover:link-underline'
-      )}  
+      )}
     >
       {children}
     </Link>
