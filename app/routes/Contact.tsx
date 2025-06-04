@@ -1,15 +1,14 @@
-import { ActionFunctionArgs, json } from '@remix-run/node';
+import { ActionFunctionArgs, json, MetaFunction } from '@remix-run/node';
 import { useActionData, Form } from '@remix-run/react';
+import { useEffect, useCallback } from 'react';
+import { z } from 'zod';
 import { Label } from '~/components/ui/label';
 import { ToastAction } from '~/components/ui/toast';
-import { z } from 'zod';
-import { MetaFunction } from '@remix-run/node';
-import ContactCTA from '~/components/contactCTA';
-import { Textarea } from '~/components/ui/textarea';
 import { toast } from '~/hooks/use-toast';
 import { Input } from '~/components/ui/input';
 import { Button } from '~/components/ui/button';
-import { useEffect, useCallback } from 'react';
+import { Textarea } from '~/components/ui/textarea';
+import ContactCTA from '~/components/contactCTA';
 import { sendEmail } from '~/utils/email.server';
 
 export const meta: MetaFunction = () => {
@@ -27,11 +26,10 @@ const ContactSchema = z.object({
 });
 
 export async function action({ request }: ActionFunctionArgs) {
-  const formData: any = await request.formData();
-  const values = Object.fromEntries(formData);
+  const formData = await request.formData();
+  const values = Object.fromEntries(formData.entries());
 
   const result = ContactSchema.safeParse(values);
-  const { data, error } = await sendEmail(formData);
 
   if (!result.success) {
     return json(
@@ -44,12 +42,14 @@ export async function action({ request }: ActionFunctionArgs) {
     );
   }
 
-  if (error) {
+  const emailResult = await sendEmail(values as any);
+  if (emailResult.error) {
+    console.error('Email sending failed:', emailResult.error);
     return json(
       {
         success: false,
-        errors: error,
-        values: data,
+        error: emailResult.error,
+        values,
       },
       { status: 500 }
     );
@@ -64,7 +64,8 @@ const Contact = () => {
   const showToast = useCallback(() => {
     toast({
       title: 'Your message has been sent!',
-      description: 'We will get back to you shortly.',
+      description:
+        'Thank you for reaching out to me. I will get back to you shortly.',
       action: <ToastAction altText="Okay">Okay</ToastAction>,
     });
   }, []);
@@ -72,27 +73,30 @@ const Contact = () => {
   useEffect(() => {
     if (actionData?.success) {
       showToast();
+      // Reset form values in remix
+      (document.querySelector('.contact-from') as HTMLFormElement).reset();
     }
-    if (actionData?.errors) {
+
+    if (actionData?.error) {
       toast({
         variant: 'destructive',
         title: 'Uh oh! Something went wrong.',
-        description: actionData.errors,
+        description: actionData.error,
         action: <ToastAction altText="Try again">Try again</ToastAction>,
       });
     }
-  }, [actionData?.success, actionData?.errors, showToast]);
+  }, [actionData, showToast]);
 
   return (
     <div className="min-h-screen flex flex-col">
       <div className="flex-1">
-        <div className="max-w-7xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 py-12">
             <ContactCTA />
-            <div className=" p-6 space-y-6">
+            <div className="p-6 space-y-6">
               <h1 className="text-2xl font-bold">Contact me</h1>
 
-              <Form method="post" className="space-y-4">
+              <Form method="post" className="space-y-4 contact-from">
                 <div>
                   <Label htmlFor="name">Name</Label>
                   <Input
