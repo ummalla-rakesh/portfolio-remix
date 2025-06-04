@@ -1,6 +1,5 @@
 import { Resend } from 'resend';
-
-// app/utils/email.server.ts
+import 'dotenv/config';
 export async function sendEmail({
   name,
   email,
@@ -25,9 +24,9 @@ export async function sendEmail({
 
   try {
     const emailResponse = await resend.emails.send({
-      from: `Portfolio Contact <${email}>`,
+      from: 'Acme <onboarding@resend.dev>',
       to: [ownerEmail],
-      subject: 'New Message from Portfolio',
+      subject: `Portfolio Contact <${email}>`,
       html: `
         <p>Hi Rakesh,</p>
         <p><strong>From:</strong> ${name} (${email})</p>
